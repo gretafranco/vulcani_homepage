@@ -1,102 +1,87 @@
-let noiseScale = 0.002; // Riduci noiseScale per forme più GRANDI e meno dettagliate
-let speed = 0.0003;    // Riduci la velocità per un movimento più lento e graduale
-let t = 0;             // Variabile temporale per l'animazione
 
-// Buffer per una maggiore fluidità nella transizione dei colori (opzionale, ma può aiutare)
-// let graphics; 
+let t = 0;
 
 function setup() {
-    let canvas = createCanvas(windowWidth, windowHeight);
-    canvas.id('p5-background-canvas');
-    
-    // Non abbiamo bisogno di frameRate esplicito, 60fps di default è ok
-    noStroke(); 
-    pixelDensity(1); // Importante per performance e consistenza su schermi ad alta densità
-    
-    // Inizializza il buffer (se usato)
-    // graphics = createGraphics(width, height);
-    // graphics.noStroke();
-    // graphics.pixelDensity(1);
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.id("p5-background-canvas");
+  pixelDensity(1);
+  noStroke();
 }
 
 function draw() {
-    // Aggiorna la variabile temporale per l'animazione
-    t += speed;
+  loadPixels();
 
-    // Se usi un buffer:
-    // graphics.loadPixels();
-    // for (let x = 0; x < graphics.width; x++) {
-    //     for (let y = 0; y < graphics.height; y++) {
-    //         // ... (logica del rumore) ...
-    //         // graphics.pixels[index] = r;
-    //         // ...
-    //     }
-    // }
-    // graphics.updatePixels();
-    // image(graphics, 0, 0); // Disegna il buffer sul canvas principale
+  let scale = 0.0013;     // leggermente più grande → forme più “morbide”
+  let flow = 0.002;       // t cresce più velocemente → movimento più visibile
+  t += flow;
 
-
-    loadPixels(); // Carica i pixel del canvas principale
-
+  for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
-            
-            // Generazione del valore di rumore di Perlin
-            // Nota l'uso di una coordinata Y leggermente più compressa (y*1.5) per dare una direzione più "verticale"
-            // al flusso, come la lava che sale/scende, e il rumore è leggermente offset in Y
-            let noiseVal = noise(
-                x * noiseScale, 
-                y * noiseScale * 1.5 + t * 50, // Aggiungi un offset a Y legato al tempo per "flusso"
-                t
-            );
 
-            let r, g, b;
+      // coordinate base
+      let nx = x * scale;
+      let ny = y * scale;
 
-            // Rivedi la mappatura dei colori per un effetto più sfumato e caldo
-            // Mappiamo il rumore in un range che va da un nero profondo a un giallo brillante,
-            // passando per rossi e arancioni.
+      // --- DOMAIN WARP POTENZIATO ---
+      let warp1x = (noise(nx + t * 0.8, ny, t * 0.4) * 2 - 1) * 1.2;
+      let warp1y = (noise(nx, ny + t * 0.8, t * 0.4) * 2 - 1) * 1.2;
 
-            // Colori di riferimento:
-            // Nero: (0,0,0)
-            // Rosso Scuro: (150,0,0)
-            // Arancione Scuro: (200,80,0)
-            // Arancione Brillante: (255,165,0)
-            // Giallo Caldo: (255,200,50)
-            // Giallo Pallido/Bianco: (255,255,200)
+      // secondo warp per effetto “melting”
+      let warp2x = (noise(nx * 0.6 + t * 0.5, ny * 0.6, t) * 2 - 1) * 0.9;
+      let warp2y = (noise(nx * 0.6, ny * 0.6 + t * 0.5, t) * 2 - 1) * 0.9;
 
-            if (noiseVal < 0.3) {
-                // Dal nero al rosso molto scuro
-                r = map(noiseVal, 0.0, 0.3, 0, 150);
-                g = map(noiseVal, 0.0, 0.3, 0, 0); // Verde sempre 0 qui
-                b = map(noiseVal, 0.0, 0.3, 0, 0); // Blu sempre 0 qui
-            } else if (noiseVal < 0.5) {
-                // Dal rosso scuro all'arancione scuro
-                r = map(noiseVal, 0.3, 0.5, 150, 200);
-                g = map(noiseVal, 0.3, 0.5, 0, 80);
-                b = map(noiseVal, 0.3, 0.5, 0, 0);
-            } else if (noiseVal < 0.7) {
-                // Dall'arancione scuro all'arancione brillante
-                r = map(noiseVal, 0.5, 0.7, 200, 255);
-                g = map(noiseVal, 0.5, 0.7, 80, 165);
-                b = map(noiseVal, 0.5, 0.7, 0, 0);
-            } else {
-                // Dall'arancione brillante al giallo pallido/bianco
-                r = map(noiseVal, 0.7, 1.0, 255, 255);
-                g = map(noiseVal, 0.7, 1.0, 165, 255);
-                b = map(noiseVal, 0.7, 1.0, 0, 200);
-            }
-            
-            let index = (x + y * width) * 4;
-            pixels[index] = r;      
-            pixels[index + 1] = g;  
-            pixels[index + 2] = b;  
-            pixels[index + 3] = 255; 
-        }
+      // coordinate finali deformate
+      let fx = nx + warp1x + warp2x;
+      let fy = ny + warp1y + warp2y;
+
+      // noise finale
+      let n = noise(fx, fy, t * 0.3);
+
+      // smoothstep
+      n = smoothstep(0.22, 0.82, n);
+
+      // curva luminosa
+      let heat = pow(n, 1.7);
+
+      // colore lava
+      let col = lavaColor(heat);
+
+      let idx = (x + y * width) * 4;
+      pixels[idx] = col[0];
+      pixels[idx + 1] = col[1];
+      pixels[idx + 2] = col[2];
+      pixels[idx + 3] = 255;
     }
+  }
 
-    updatePixels(); 
+  updatePixels();
+}
+
+
+// --- funzioni di supporto --- //
+
+function smoothstep(a, b, x) {
+  x = constrain((x - a) / (b - a), 0, 1);
+  return x * x * (3 - 2 * x);
+}
+
+function lavaColor(h) {
+  // FF2B00 → (255, 43, 0)
+  let r = lerp(10, 255, h);
+  let g = lerp(2, 43, pow(h, 0.6));
+  let b = lerp(0, 0, h);
+
+  if (h > 0.7) {
+    let k = map(h, 0.7, 1.0, 0, 1);
+    r = lerp(r, 255, k);
+    g = lerp(g, 220, k);
+    b = lerp(b, 150, k);
+  }
+
+  return [r, g, b];
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight);
 }
+
