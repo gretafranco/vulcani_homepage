@@ -1,0 +1,123 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    color: #FF2B00;
+    background: black;
+    overflow-x: hidden;
+}
+
+header {
+    width: 100%;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    z-index: 10;
+}
+
+header a {
+    text-decoration: none;
+    color: #FF2B00;
+    margin-left: 40px;
+    font-size: 14px;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.hero {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 60px;
+    color: #FF2B00;
+    font-weight: bold;
+    z-index: 2;
+    margin-bottom: 40px;
+}
+
+.scroll-icon {
+    font-size: 40px;
+    color: #FF2B00;
+    opacity: 0.7;
+    animation: bounce 2s infinite;
+    z-index: 2;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+}
+
+.content {
+    padding: 200px 200px;
+    text-align: left;
+}
+
+.content h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.content p {
+    font-size: 14px;
+    color: #e1b8a5;
+    max-width: 700px;
+    line-height: 20px;
+}
+
+.map-button {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 8px 25px;
+    border-radius: 20px;
+    background-color: #FF2B00;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+footer {
+    width: 100%;
+    border-top: 1px solid #FF2B00;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    bottom: 0;
+    color: #FF2B00;
+    font-size: 12px;
+}
+
+#p5-background-canvas {
+    position: fixed; /* Rende il canvas fisso nello sfondo */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0; /* Lo pone sotto il resto del contenuto */
+}
+
+header,
+.hero,
+.content,
+footer {
+    position: relative; /* FONDAMENTALE: Permette a z-index di funzionare */
+    z-index: 1;         /* Li pone SOPRA il canvas */
+}
