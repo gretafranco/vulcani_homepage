@@ -91,24 +91,36 @@ header a {
 .content {
     padding: 200px 200px;
     text-align: left;
-    background-color: (255, 255, 255,); /* Sfondo bianco per la sezione di testo */
-    color: #000000; /* Testo nero */
+    /* Ho corretto la sintassi del background-color */
+    background-color: rgb(255, 255, 255); 
+    color: #000000;
 }
 
+.content-flex-container {
+    display: grid; /* Passa a Grid Layout */
+    grid-template-columns: 1fr 1fr; /* Dividi lo spazio in due colonne uguali */
+    gap: 100px; /* Mantiene lo spazio centrale */
+    
+    /* !!! QUESTA È LA CHIAVE !!! */
+    /* Allinea gli elementi lungo l'asse orizzontale in base alla loro ULTIMA linea di base */
+    align-items: last baseline; 
+}
+
+/* Rimuovi flex: 1 dal contenuto, non è più necessario in Grid */
 .content h2 {
     font-size: 32px;
     margin-bottom: 20px;
-    color:#FF2B00
+    color: #FF2B00;
+    /* Rimuovi: flex: 1; */ 
 }
 
 .content p {
     font-size: 14px;
-    color: #000000; /* Testo paragrafo nero */
-    background-color:(255, 255, 255);
-    max-width: 700px;
+    color: #000000;
     line-height: 20px;
+    /* Rimuovi: flex: 1; */
+    max-width: none; /* Rimuovi o imposta su 'none' per far occupare l'intera colonna Grid */
 }
-
 .map-button {
     display: inline-block;
     margin-top: 40px;
@@ -119,6 +131,9 @@ header a {
     text-decoration: none;
     font-size: 14px;
 }
+
+
+
 
 footer {
     width: 100%;
